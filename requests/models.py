@@ -374,7 +374,7 @@ class Request(object):
                 if self.cookies is not None:
                     self.cookies.extract_cookies(resp, req)
 
-            except (urllib2.HTTPError, urllib2.URLError), why:
+            except (urllib2.HTTPError, urllib2.URLError) as why:
                 if hasattr(why, 'reason'):
                     if isinstance(why.reason, socket.timeout):
                         why = Timeout(why)
