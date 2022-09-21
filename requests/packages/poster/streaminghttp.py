@@ -26,7 +26,7 @@ Example usage:
 ...                       {'Content-Length': str(len(s))})
 """
 
-import http.client, urllib.request, urllib.error, urllib.parse, socket
+import http.client, urllib.request, urllib.error, urllib.parse, socket, httplib
 from http.client import NotConnected
 
 __all__ = ['StreamingHTTPConnection', 'StreamingHTTPRedirectHandler',
