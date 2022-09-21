@@ -9,7 +9,7 @@ requests (cookies, auth, proxies).
 
 """
 
-import http.cookiejar
+import cookielib
 
 from .defaults import defaults
 from .models import Request
@@ -26,7 +26,7 @@ def merge_kwargs(local_kwarg, default_kwarg):
     if default_kwarg is None:
         return local_kwarg
 
-    if isinstance(local_kwarg, str):
+    if isinstance(local_kwarg, basestring):
         return local_kwarg
 
     if local_kwarg is None:
@@ -41,7 +41,7 @@ def merge_kwargs(local_kwarg, default_kwarg):
     kwargs.update(local_kwarg)
 
     # Remove keys that are set to None.
-    for (k,v) in list(local_kwarg.items()):
+    for (k,v) in local_kwarg.items():
         if v is None:
             del kwargs[k]
 
@@ -77,11 +77,11 @@ class Session(object):
         self.config = config or {}
         self.keep_alive = keep_alive
 
-        for (k, v) in list(defaults.items()):
+        for (k, v) in defaults.items():
             self.config.setdefault(k, v)
 
         # Set up a CookieJar to be used by default
-        self.cookies = http.cookiejar.FileCookieJar()
+        self.cookies = cookielib.FileCookieJar()
 
     def __repr__(self):
         return '<requests-client at 0x%x>' % (id(self))
@@ -136,7 +136,7 @@ class Session(object):
 
         # Expand header values
         if headers:
-            for k, v in list(headers.items()) or {}:
+            for k, v in headers.items() or {}:
                 headers[k] = header_expand(v)
 
         args = dict(

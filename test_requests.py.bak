@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
+from __future__ import with_statement
 
 import time
-import http.cookiejar
+import cookielib
 import os
 import unittest
 
@@ -248,7 +248,7 @@ class RequestsTestSuite(unittest.TestCase):
 
     def test_cookie_jar(self):
 
-        jar = http.cookiejar.CookieJar()
+        jar = cookielib.CookieJar()
         self.assertFalse(jar)
 
         url = httpbin('cookies', 'set', 'requests_cookie', 'awesome')
@@ -258,7 +258,7 @@ class RequestsTestSuite(unittest.TestCase):
         cookie_found = False
         for cookie in jar:
             if cookie.name == 'requests_cookie':
-                self.assertEqual(cookie.value, 'awesome')
+                self.assertEquals(cookie.value, 'awesome')
                 cookie_found = True
         self.assertTrue(cookie_found)
 
@@ -278,11 +278,11 @@ class RequestsTestSuite(unittest.TestCase):
 
             url = service('/get')
 
-            requests.get(url, params={'foo': 'føø'})
+            requests.get(url, params={'foo': u'føø'})
+            requests.get(url, params={u'føø': u'føø'})
             requests.get(url, params={'føø': 'føø'})
-            requests.get(url, params={'føø': 'føø'})
-            requests.get(url, params={'foo': 'foo'})
-            requests.get(service('ø'), params={'foo': 'foo'})
+            requests.get(url, params={'foo': u'foo'})
+            requests.get(service('ø'), params={'foo': u'foo'})
 
 
     def test_httpauth_recursion(self):
@@ -291,7 +291,7 @@ class RequestsTestSuite(unittest.TestCase):
 
         for service in SERVICES:
             r = requests.get(service('basic-auth', 'user', 'pass'), auth=http_auth)
-            self.assertEqual(r.status_code, 401)
+            self.assertEquals(r.status_code, 401)
 
 
     def test_urlencoded_post_data(self):
@@ -300,14 +300,14 @@ class RequestsTestSuite(unittest.TestCase):
 
             r = requests.post(service('post'), data=dict(test='fooaowpeuf'))
 
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post'))
 
             rbody = json.loads(r.content)
 
-            self.assertEqual(rbody.get('form'), dict(test='fooaowpeuf'))
-            self.assertEqual(rbody.get('data'), '')
+            self.assertEquals(rbody.get('form'), dict(test='fooaowpeuf'))
+            self.assertEquals(rbody.get('data'), '')
 
 
     def test_nonurlencoded_post_data(self):
@@ -316,15 +316,15 @@ class RequestsTestSuite(unittest.TestCase):
 
             r = requests.post(service('post'), data='fooaowpeuf')
 
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post'))
 
             rbody = json.loads(r.content)
             # Body wasn't valid url encoded data, so the server returns None as
             # "form" and the raw body as "data".
-            self.assertEqual(rbody.get('form'), None)
-            self.assertEqual(rbody.get('data'), 'fooaowpeuf')
+            self.assertEquals(rbody.get('form'), None)
+            self.assertEquals(rbody.get('data'), 'fooaowpeuf')
 
 
     def test_urlencoded_post_querystring(self):
@@ -333,13 +333,13 @@ class RequestsTestSuite(unittest.TestCase):
 
             r = requests.post(service('post'), params=dict(test='fooaowpeuf'))
 
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post?test=fooaowpeuf'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post?test=fooaowpeuf'))
 
             rbody = json.loads(r.content)
-            self.assertEqual(rbody.get('form'), {}) # No form supplied
-            self.assertEqual(rbody.get('data'), '')
+            self.assertEquals(rbody.get('form'), {}) # No form supplied
+            self.assertEquals(rbody.get('data'), '')
 
 
     def test_nonurlencoded_post_querystring(self):
@@ -348,13 +348,13 @@ class RequestsTestSuite(unittest.TestCase):
 
             r = requests.post(service('post'), params='fooaowpeuf')
 
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post?fooaowpeuf'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post?fooaowpeuf'))
 
             rbody = json.loads(r.content)
-            self.assertEqual(rbody.get('form'), {}) # No form supplied
-            self.assertEqual(rbody.get('data'), '')
+            self.assertEquals(rbody.get('form'), {}) # No form supplied
+            self.assertEquals(rbody.get('data'), '')
 
 
     def test_urlencoded_post_query_and_data(self):
@@ -366,13 +366,13 @@ class RequestsTestSuite(unittest.TestCase):
                 params=dict(test='fooaowpeuf'),
                 data=dict(test2="foobar"))
 
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post?test=fooaowpeuf'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post?test=fooaowpeuf'))
 
             rbody = json.loads(r.content)
-            self.assertEqual(rbody.get('form'), dict(test2='foobar'))
-            self.assertEqual(rbody.get('data'), '')
+            self.assertEquals(rbody.get('form'), dict(test2='foobar'))
+            self.assertEquals(rbody.get('data'), '')
 
 
     def test_nonurlencoded_post_query_and_data(self):
@@ -382,14 +382,14 @@ class RequestsTestSuite(unittest.TestCase):
             r = requests.post(service('post'),
                 params='fooaowpeuf', data="foobar")
 
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post?fooaowpeuf'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post?fooaowpeuf'))
 
             rbody = json.loads(r.content)
 
-            self.assertEqual(rbody.get('form'), None)
-            self.assertEqual(rbody.get('data'), 'foobar')
+            self.assertEquals(rbody.get('form'), None)
+            self.assertEquals(rbody.get('data'), 'foobar')
 
 
     # def test_idna(self):
@@ -402,8 +402,8 @@ class RequestsTestSuite(unittest.TestCase):
         for service in SERVICES:
 
             r = requests.get(service('get'), params=dict(test=['foo','baz']))
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.url, service('get?test=foo&test=baz'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.url, service('get?test=foo&test=baz'))
 
 
     def test_urlencoded_post_querystring_multivalued(self):
@@ -411,13 +411,13 @@ class RequestsTestSuite(unittest.TestCase):
         for service in SERVICES:
 
             r = requests.post(service('post'), params=dict(test=['foo','baz']))
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post?test=foo&test=baz'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post?test=foo&test=baz'))
 
             rbody = json.loads(r.content)
-            self.assertEqual(rbody.get('form'), {}) # No form supplied
-            self.assertEqual(rbody.get('data'), '')
+            self.assertEquals(rbody.get('form'), {}) # No form supplied
+            self.assertEquals(rbody.get('data'), '')
 
 
     def test_urlencoded_post_query_multivalued_and_data(self):
@@ -429,12 +429,12 @@ class RequestsTestSuite(unittest.TestCase):
                 params=dict(test=['foo','baz']),
                 data=dict(test2="foobar",test3=['foo','baz']))
 
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['content-type'], 'application/json')
-            self.assertEqual(r.url, service('post?test=foo&test=baz'))
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(r.headers['content-type'], 'application/json')
+            self.assertEquals(r.url, service('post?test=foo&test=baz'))
             rbody = json.loads(r.content)
-            self.assertEqual(rbody.get('form'), dict(test2='foobar',test3='foo'))
-            self.assertEqual(rbody.get('data'), '')
+            self.assertEquals(rbody.get('form'), dict(test2='foobar',test3='foo'))
+            self.assertEquals(rbody.get('data'), '')
 
 
     def test_GET_no_redirect(self):
@@ -442,8 +442,8 @@ class RequestsTestSuite(unittest.TestCase):
         for service in SERVICES:
 
             r = requests.get(service('redirect', '3'), allow_redirects=False)
-            self.assertEqual(r.status_code, 302)
-            self.assertEqual(len(r.history), 0)
+            self.assertEquals(r.status_code, 302)
+            self.assertEquals(len(r.history), 0)
 
 
     def test_HEAD_no_redirect(self):
@@ -451,8 +451,8 @@ class RequestsTestSuite(unittest.TestCase):
         for service in SERVICES:
 
             r = requests.head(service('redirect', '3'), allow_redirects=False)
-            self.assertEqual(r.status_code, 302)
-            self.assertEqual(len(r.history), 0)
+            self.assertEquals(r.status_code, 302)
+            self.assertEquals(len(r.history), 0)
 
 
     def test_redirect_history(self):
@@ -460,8 +460,8 @@ class RequestsTestSuite(unittest.TestCase):
         for service in SERVICES:
 
             r = requests.get(service('redirect', '3'))
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(len(r.history), 3)
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(len(r.history), 3)
 
 
     def test_relative_redirect_history(self):
@@ -469,8 +469,8 @@ class RequestsTestSuite(unittest.TestCase):
         for service in SERVICES:
 
             r = requests.get(service('relative-redirect', '3'))
-            self.assertEqual(r.status_code, 200)
-            self.assertEqual(len(r.history), 3)
+            self.assertEquals(r.status_code, 200)
+            self.assertEquals(len(r.history), 3)
 
 
     def test_session_HTTP_200_OK_GET(self):

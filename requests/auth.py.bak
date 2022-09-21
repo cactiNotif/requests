@@ -133,7 +133,7 @@ def dispatch(t):
         t.insert(0, 'basic')
 
     # Allow built-in string referenced auths.
-    if isinstance(t[0], str):
+    if isinstance(t[0], basestring):
         if t[0] in ('basic', 'forced_basic'):
             t[0] = http_basic
         elif t[0] in ('digest',):

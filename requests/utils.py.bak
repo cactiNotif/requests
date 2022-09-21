@@ -14,7 +14,7 @@ import codecs
 try:
     from http.cookiejar import CookieJar
 except ImportError:
-    from http.cookiejar import CookieJar
+    from cookielib import CookieJar
 import os
 import random
 import re
@@ -131,16 +131,16 @@ def header_expand(headers):
     collector = []
 
     if isinstance(headers, dict):
-        headers = list(headers.items())
+        headers = headers.items()
 
-    elif isinstance(headers, str):
+    elif isinstance(headers, basestring):
         return headers
 
     for i, (value, params) in enumerate(headers):
 
         _params = []
 
-        for (p_k, p_v) in list(params.items()):
+        for (p_k, p_v) in params.items():
 
             _params.append('%s=%s' % (p_k, p_v))
 
@@ -186,9 +186,9 @@ def dict_from_cookiejar(cj):
 
     cookie_dict = {}
 
-    for _, cookies in list(cj._cookies.items()):
-        for _, cookies in list(cookies.items()):
-            for cookie in list(cookies.values()):
+    for _, cookies in cj._cookies.items():
+        for _, cookies in cookies.items():
+            for cookie in cookies.values():
                 # print cookie
                 cookie_dict[cookie.name] = cookie.value
 
@@ -220,7 +220,7 @@ def add_dict_to_cookiejar(cj, cookie_dict):
     :param cookie_dict: Dict of key/values to insert into CookieJar.
     """
 
-    for k, v in list(cookie_dict.items()):
+    for k, v in cookie_dict.items():
 
         cookie = cookielib.Cookie(
             version=0,
@@ -286,7 +286,7 @@ def unicode_from_html(content):
     for encoding in encodings:
 
         try:
-            return str(content, encoding)
+            return unicode(content, encoding)
         except (UnicodeError, TypeError):
             pass
 
@@ -333,13 +333,13 @@ def get_unicode_from_response(r):
 
     if encoding:
         try:
-            return str(r.content, encoding)
+            return unicode(r.content, encoding)
         except UnicodeError:
             tried_encodings.append(encoding)
 
     # Fall back:
     try:
-        return str(r.content, encoding, errors='replace')
+        return unicode(r.content, encoding, errors='replace')
     except TypeError:
         return r.content
 

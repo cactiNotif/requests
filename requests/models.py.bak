@@ -7,7 +7,7 @@ requests.models
 
 """
 
-import urllib.request, urllib.parse, urllib.error
+import urllib
 import urllib.request
 import urllib.error
 import socket
@@ -116,7 +116,7 @@ class Request(object):
         else:
             headers = CaseInsensitiveDict()
 
-        for (k, v) in list(self.config.get('base_headers', {}).items()):
+        for (k, v) in self.config.get('base_headers', {}).items():
             if k not in headers:
                 headers[k] = v
 
@@ -137,20 +137,20 @@ class Request(object):
         _handlers = []
 
         if self.cookies is not None:
-            _handlers.append(urllib.request.HTTPCookieProcessor(self.cookies))
+            _handlers.append(urllib2.HTTPCookieProcessor(self.cookies))
 
         if self.proxies:
-            _handlers.append(urllib.request.ProxyHandler(self.proxies))
+            _handlers.append(urllib2.ProxyHandler(self.proxies))
 
         _handlers.append(HTTPRedirectHandler)
 
         if not _handlers:
-            return urllib.request.urlopen
+            return urllib2.urlopen
 
         if self.data or self.files:
             _handlers.extend(get_handlers())
 
-        opener = urllib.request.build_opener(*_handlers)
+        opener = urllib2.build_opener(*_handlers)
 
         if self.headers:
             # Allow default headers in the opener to be overloaded
@@ -223,7 +223,7 @@ class Request(object):
                 # Facilitate non-RFC2616-compliant 'location' headers
                 # (e.g. '/path/to/resource' instead of 'http://domain.tld/path/to/resource')
                 if not urlparse(url).netloc:
-                    url = urljoin(r.url, urllib.parse.quote(urllib.parse.unquote(url)))
+                    url = urljoin(r.url, urllib.quote(urllib.unquote(url)))
 
                 # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.4
                 if r.status_code is codes.see_other:
@@ -266,11 +266,11 @@ class Request(object):
 
         if hasattr(data, 'items'):
             result = []
-            for k, vs in list(data.items()):
+            for k, vs in data.items():
                 for v in isinstance(vs, list) and vs or [vs]:
-                    result.append((k.encode('utf-8') if isinstance(k, str) else k,
-                                   v.encode('utf-8') if isinstance(v, str) else v))
-            return result, urllib.parse.urlencode(result, doseq=True)
+                    result.append((k.encode('utf-8') if isinstance(k, unicode) else k,
+                                   v.encode('utf-8') if isinstance(v, unicode) else v))
+            return result, urllib.urlencode(result, doseq=True)
         else:
             return data, data
 
@@ -281,9 +281,9 @@ class Request(object):
         # Support for unicode domain names and paths.
         scheme, netloc, path, params, query, fragment = urlparse(self.url)
         netloc = netloc.encode('idna')
-        if isinstance(path, str):
+        if isinstance(path, unicode):
             path = path.encode('utf-8')
-        path = urllib.parse.quote(urllib.parse.unquote(path))
+        path = urllib.quote(urllib.unquote(path))
         self.url = str(urlunparse([ scheme, netloc, path, params, query, fragment ]))
 
         if self._enc_params:
@@ -345,7 +345,7 @@ class Request(object):
 
         # Add the headers to the request.
         if self.headers:
-            for k,v in self.headers.items():
+            for k,v in self.headers.iteritems():
                 req.add_header(k, v)
 
         if not self.sent or anyway:
@@ -375,7 +375,7 @@ class Request(object):
                 if self.cookies is not None:
                     self.cookies.extract_cookies(resp, req)
 
-            except (urllib.error.HTTPError, urllib.error.URLError) as why:
+            except (urllib2.HTTPError, urllib2.URLError) as why:
                 if hasattr(why, 'reason'):
                     if isinstance(why.reason, socket.timeout):
                         why = Timeout(why)
@@ -452,7 +452,7 @@ class Response(object):
         return '<Response [%s]>' % (self.status_code)
 
 
-    def __bool__(self):
+    def __nonzero__(self):
         """Returns true if :attr:`status_code` is 'OK'."""
 
         return not self.error
