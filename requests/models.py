@@ -13,7 +13,7 @@ import urllib.error
 import socket
 import zlib
 
-from urlparse import urlparse, urlunparse, urljoin
+from urllib.parse import urlparse, urlunparse, urljoin
 from datetime import datetime
 
 from .auth import dispatch as auth_dispatch
