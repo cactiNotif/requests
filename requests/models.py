@@ -8,7 +8,8 @@ requests.models
 """
 
 import urllib
-import urllib2
+import urllib.request
+import urllib.error
 import socket
 import zlib
 
