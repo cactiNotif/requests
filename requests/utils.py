@@ -11,7 +11,10 @@ that are also useful for external consumption.
 
 import cgi
 import codecs
-import cookielib
+try:
+    from http.cookiejar import CookieJar
+except ImportError:
+    from cookielib import CookieJar
 import os
 import random
 import re
