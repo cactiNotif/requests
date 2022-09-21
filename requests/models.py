@@ -355,7 +355,7 @@ class Request(object):
 
                     resp = opener(req, timeout=self.timeout)
 
-                except TypeError, err:
+                except TypeError as err:
                     # timeout argument is new since Python v2.6
                     if not 'timeout' in str(err):
                         raise
